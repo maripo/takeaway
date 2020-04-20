@@ -172,9 +172,9 @@ var Takeaway = (function () {
               console.log(tags.cuisine);
               cuisine = tags.cuisine.split(";").map(
                   (key) =>{
-                      return Conf.category.cuisine[tags.cuisine] || key;
+                      return Conf.category.cuisine[key] || key;
                   }
-              );
+              ).join(", ");
             } else {
               cuisine = "-";
             }
