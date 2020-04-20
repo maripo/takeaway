@@ -33,7 +33,6 @@
         },
         {
             "glot-model": "owner",
-<<<<<<< HEAD
             "linkto": "http://coderdojo-takatsuki.hatenablog.com/",
             "divider": true
         },
@@ -50,9 +49,6 @@
         {
             "glot-model": "openstreetmap",
             "linkto": "https://www.openstreetmap.org/",
-=======
-            "linkto": "https://github.com/K-Sakanoshita/takeaway",
->>>>>>> cuisine
             "divider": false
         }
     ],
