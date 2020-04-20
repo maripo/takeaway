@@ -123,6 +123,10 @@ img.icon {
     height: 16px;
 }
 
+a.icon {
+    color: white;    
+}
+
 span.icon {
     margin-left: 4px;
     font-size: 14px;
@@ -130,6 +134,11 @@ span.icon {
     background-color: white;
     line-height: 1.0;
     opacity: 0.7;
+}
+
+pre {
+    font: initial !important;
+    font-size: 100% !important;
 }
 
 .modal-backdrop {

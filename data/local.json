@@ -14,7 +14,7 @@
         {
             "glot-model": "id_edit_manual",
             "linkto": "https://maripo.org/osm_beginners_guide/",
-            "divider": true
+            "divider": false
         },
         {
             "glot-model": "mapcontrib_edit_manual",
@@ -27,7 +27,13 @@
             "divider": true
         },
         {
+            "glot-model": "openstreetmap",
+            "linkto": "https://www.openstreetmap.org/",
+            "divider": false
+        },
+        {
             "glot-model": "owner",
+<<<<<<< HEAD
             "linkto": "http://coderdojo-takatsuki.hatenablog.com/",
             "divider": true
         },
@@ -44,35 +50,62 @@
         {
             "glot-model": "openstreetmap",
             "linkto": "https://www.openstreetmap.org/",
+=======
+            "linkto": "https://github.com/K-Sakanoshita/takeaway",
+>>>>>>> cuisine
             "divider": false
         }
     ],
     "target": {
-        "TAK": {
+        "takeaway": {
+            "ovpass": [
+                "node[\"takeaway\"]",
+                "way[\"takeaway\"]",
+                "node[\"takeaway:covid19\"]",
+                "way[\"takeaway:covid19\"]"
+            ],
             "list": true,
             "zoom": 15,
             "icon": "./image/bentou.svg"
         },
-        "DEL": {
+        "delivery": {
+            "ovpass": [
+                "node[\"delivery\"]",
+                "way[\"delivery\"]",
+                "node[\"delivery:covid19\"]",
+                "way[\"delivery:covid19\"]"
+            ],
             "list": true,
             "zoom": 15,
             "icon": "./image/delivery.svg"
         },
-        "DEF": {
+        "takeaway_shop": {
+            "ovpass": [
+                "node[\"shop\"=\"bakery\"]",
+                "way[\"shop\"=\"bakery\"]",
+                "node[\"shop\"=\"deli\"]",
+                "way[\"shop\"=\"deli\"]"
+            ],
             "list": true,
             "zoom": 15,
             "icon": "./image/bentou.svg"
         },
-        "VND": {
+        "vending_machine": {
+            "ovpass": [
+                "node[\"amenity\"=\"vending_machine\"][\"vending\"=\"drinks\"]"
+            ],
             "list": false,
             "zoom": 17,
             "icon": "./image/vending.svg"
         },
-        "LIB": {
+        "library": {
+            "ovpass": [
+                "node[\"amenity\"=\"library\"]",
+                "way[\"amenity\"=\"library\"]"
+            ],
             "list": true,
             "zoom": 15,
             "icon": "./image/library.svg"
         }
     }
 }
-

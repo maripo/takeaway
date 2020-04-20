@@ -1,11 +1,20 @@
 {
     "title": {
+<<<<<<< HEAD
         "ja": "みんなでテイクアウトMAP <東京版>",
         "en": "Takeout MAP with everyone <Tokyo Ver>"
+=======
+        "ja": "みんなでテイクアウトMAP <開発版>",
+        "en": "Takeout MAP with everyone <Develop Ver>"
+>>>>>>> cuisine
     },
     "owner": {
-        "ja": "CoderDojo高槻について",
-        "en": "about CoderDojo Takatsuki"
+        "ja": "みんなでテイクアウトMAP <開発版>について",
+        "en": "about Takeout MAP with everyone"
+    },
+    "openstreetmap": {
+        "ja": "データ元のOpenStreetMapについて",
+        "en": "About the data source OpenStreetMap"
     },
     "takeaway_takatsuki": {
         "ja": "高槻版",
