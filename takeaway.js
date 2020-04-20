@@ -169,7 +169,6 @@ var Takeaway = (function () {
             
             let cuisine;
             if (tags.cuisine != null) {
-              console.log(tags.cuisine);
               cuisine = tags.cuisine.split(";").map(
                   (key) =>{
                       return Conf.category.cuisine[key] || key;
