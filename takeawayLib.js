@@ -11,13 +11,12 @@ var PoiCont = (function () {
         set: function (pois) {      // pois: {geojson: [],targets: []}
             PoiData = { geojson: pois.geojson, targets: pois.targets };
             PoiData.geojson.forEach(function (node, node_idx) {
-                let tags = node.properties;
                 if (node.geometry.type == "Polygon") {
-                    latlngs[tags.id] = { "lat": node.geometry.coordinates[0][0][1], "lng": node.geometry.coordinates[0][0][0] };
+                    latlngs[node.id] = { "lat": node.geometry.coordinates[0][0][1], "lng": node.geometry.coordinates[0][0][0] };
                 } else {
-                    latlngs[tags.id] = { "lat": node.geometry.coordinates[1], "lng": node.geometry.coordinates[0] };
+                    latlngs[node.id] = { "lat": node.geometry.coordinates[1], "lng": node.geometry.coordinates[0] };
                 }
-                geoidx[tags.id] = node_idx;
+                geoidx[node.id] = node_idx;
             });
         },
         get_target: function (targets) {        // 指定したtargetのgeojsonと緯度経度を返す
@@ -40,12 +39,15 @@ var PoiCont = (function () {
         list: function (targets) {              // DataTables向きのJsonデータリストを出力
             let pois = poi_filter(targets);     // targetsに指定されたpoiのみフィルター
             let datas = [];
-            pois.geojson.forEach(node => {
+            pois.geojson.forEach((node, idx) => {
                 let tags = node.properties;
-                let name = tags.name == undefined ? "-" : tags.name;
+                let _7DaysAgo = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 7);                //更新一週間以内のデータには印を付加する
+                let update = "<span class='text-danger'>" + glot.get("list_update") + "</span>";
+                let name = tags.name == undefined ? "-" : tags.name + (_7DaysAgo < new Date(tags.timestamp) ? update : '');
                 let category = PoiCont.get_catname(tags);
                 let between = Math.round(PoiCont.calc_between(latlngs[tags.id], map.getCenter()));
-                datas.push({ "osmid": tags.id, "name": name, "category": category, "between": between });
+                let target = pois.targets[idx].join(',');
+                datas.push({ "osmid": tags.id, "name": name, "category": category, "between": between, "target": target });
             });
             datas.sort((a, b) => {
                 if (a.between > b.between) {
@@ -70,6 +72,7 @@ var PoiCont = (function () {
 
     // targetsに指定されたpoiのみフィルター
     function poi_filter(targets) {
+        let tars = [];
         let pois = PoiData.geojson.filter(function (geojson_val, geojson_idx) {
             let found = false;
             for (let target_idx in PoiData.targets[geojson_idx]) {
@@ -78,14 +81,14 @@ var PoiCont = (function () {
                     break;
                 };
             };
+            if (found) tars.push(PoiData.targets[geojson_idx]);
             return found;
         });
         let lls = [];
-        pois.forEach(function (node) {
-            let tags = node.properties;
-            lls.push(latlngs[tags.id]);
+        pois.forEach(function (node, idx) {
+            lls.push(latlngs[node.properties.id]);
         });
-        return { geojson: pois, latlng: lls };
+        return { geojson: pois, latlng: lls, targets: tars };
     };
 })();
 
@@ -100,9 +103,22 @@ var Marker = (function () {
             let pois = PoiCont.get_target(target);
             if (pois.geojson !== undefined) {
                 pois.geojson.forEach(function (node, idx) {
+                    let html;
                     let tags = node.properties;
-                    let icon = L.divIcon({ className: 'icon', html: '<img class="icon" src="' + Conf.target[target].icon + '">' });
-                    tags.takeaway_icon = Conf.target[target].icon;   // icon情報を埋め込み(詳細情報表示で利用)
+                    let name = tags.name == undefined || Conf.local.TextViewZoom > map.getZoom() ? "" : tags.name;
+                    let keyn = tags.amenity !== undefined ? "amenity" : "shop";
+                    let icon = Conf.icon[keyn][tags[keyn]];
+                    icon = "./image/" + (icon !== undefined ? icon : Conf.icon.default);
+                    tags.takeaway_icon = icon;   // icon情報を埋め込み(詳細情報表示で利用)
+                    switch (name) {
+                        case "":
+                            html = '<img class="icon" src="' + icon + '">'
+                            break;
+                        default:
+                            html = '<div class="d-flex align-items-center"><img class="icon" src="' + icon + '"><span class="icon">' + name + '</span></div>'
+                            break;
+                    }
+                    icon = L.divIcon({ "className": 'icon', "iconAnchor": [8, 8] , "html": html});
                     markers[target].push(L.marker(new L.LatLng(pois.latlng[idx].lat, pois.latlng[idx].lng), { icon: icon, draggable: false }));
                     markers[target][markers[target].length - 1].addTo(map).on('click', e => Takeaway.view(e.target.takeaway_id));
                     markers[target][markers[target].length - 1].takeaway_id = tags.id;
@@ -112,7 +128,8 @@ var Marker = (function () {
 
         all_delete: function (target) { // all delete
             if (markers[target] !== undefined) {
-                markers[target].forEach(marker => marker.remove(map));
+                markers[target].forEach(marker => map.removeLayer(marker));
+                // markers[target].forEach(marker => marker.remove(map));
                 markers[target] = [];
             }
         },
@@ -122,39 +139,6 @@ var Marker = (function () {
             PointUp.radius = Math.pow(2, 21 - map.getZoom());
             let circle = L.circle(PoiCont.get_osmid(osmid).latlng, PointUp).addTo(map);
             setTimeout(() => map.removeLayer(circle), 2000);
-        },
-
-        event_move: (e) => {                // map.moveend発生時のイベント
-            console.log("moveend: event start.");
-            LL.NW = map.getBounds().getNorthWest();
-            LL.SE = map.getBounds().getSouthEast();
-            let targets = Object.keys(Conf.target).filter(key => { return Conf.target[key].list });
-
-            if (LL.busy) {
-                clearTimeout(LL.id);    // no break and cancel old timer.
-                LL.busy = false;
-            } else {
-                LL.busy = true;
-                if (Takeaway.status() == "initialize") {
-                    Takeaway.get("", () => {
-                        DataList.view(targets);
-                        DisplayStatus.splash(false);
-                        if (location.search !== "") {    // 引数がある場合
-                            let osmid = location.search.replace(/[?&]fbclid.*/, '');
-                            osmid = osmid.replace('-', '/');
-                            osmid = osmid.replace('=', '');
-                            let tags = PoiCont.get_osmid(osmid.slice(1)).geojson.properties;
-                            if (tags !== undefined) Takeaway.view(tags.id);
-                        }
-                        LL.busy = false;
-                    });
-                } else {
-                    LL.id = setTimeout(() => {
-                        Takeaway.get("", () => { DataList.view(targets) });
-                        LL.busy = false;
-                    }, 1000);
-                }
-            }
         }
     }
 })();
@@ -178,6 +162,15 @@ var DataList = (function () {
                 timeout = window.setTimeout(() => DataList.filter(e.target.value), 500);
             });
 
+            // デリバリー選択肢にキーワード追加
+            DisplayStatus.clear_select("delivery_list");
+            DisplayStatus.add_select("delivery_list", Conf.category.delivery.yes, "delivery");
+            let delivery_list = document.getElementById("delivery_list");
+            delivery_list.addEventListener("change", (e) => {
+                let keyword = e.target.value == "-" ? "" : e.target.value;
+                table.column(3).search(keyword).draw();
+            });
+
             // カテゴリ選択時にキーワード検索
             let category_list = document.getElementById("category_list");
             category_list.addEventListener("change", (e) => {
@@ -189,6 +182,8 @@ var DataList = (function () {
             // 店舗種別リストを作成
             let shops = [];
             DisplayStatus.clear_select("category_list");
+            DisplayStatus.clear_select("delivery_list");
+            DisplayStatus.add_select("delivery_list", Conf.category.delivery.yes, "delivery");
             shops = result.map(data => { return data.category });
             shops = shops.filter((x, i, self) => { return self.indexOf(x) === i });
             shops.map(shop => DisplayStatus.add_select("category_list", shop, shop));
@@ -199,8 +194,8 @@ var DataList = (function () {
             let result = PoiCont.list(targets);
             table = $('#tableid').DataTable({
                 "autoWidth": true,
-                "columns": [{ title: "名前", data: "name", "width": "40%" }, { title: "種類", data: "category", "width": "30%" }, { title: "距離", data: "between", "width": "20%" },],
-                "columnDefs": [{ targets: 2, render: $.fn.dataTable.render.number(',', '.', 0, '', 'm') }],
+                "columns": Object.keys(Conf.datatables_columns).map(function (key) { return Conf.datatables_columns[key] }),
+                "columnDefs": [{ "targets": 2, "render": $.fn.dataTable.render.number(',', '.', 0, '', 'm') }, { targets: 3, visible: false }],
                 "data": result,
                 "processing": true,
                 "filter": true,
@@ -251,7 +246,7 @@ var DataList = (function () {
             }
             _status = "";
         },
-        filter: KEYWORD => { table.search(KEYWORD).draw() } // キーワード検索
+        filter: keyword => { table.search(keyword).draw() } // キーワード検索
     }
 })();
 
@@ -273,7 +268,7 @@ var OvPassCnt = (function () {
                 } else {
                     DisplayStatus.progress(0);                  // Not With Cache range
                     Cache = { "geojson": [], "targets": [] };
-                    let magni = (ZoomLevel - Conf.local.MinZoomLevel) < 1 ? 0.125 : (ZoomLevel - Conf.local.MinZoomLevel) / 4;
+                    let magni = (ZoomLevel - Conf.local.IconViewZoom) < 1 ? 0.125 : (ZoomLevel - Conf.local.IconViewZoom) / 4;
                     let offset_lat = (LL.NW.lat - LL.SE.lat) * magni;
                     let offset_lng = (LL.SE.lng - LL.NW.lng) * magni;
                     let SE_lat = LL.SE.lat - offset_lat;
@@ -288,7 +283,7 @@ var OvPassCnt = (function () {
                     targets.forEach(key => {
                         let query = "";
                         for (let ovpass in Conf.target[key].ovpass) { query += Conf.target[key].ovpass[ovpass] + maparea; }
-                        let url = OvServer + '?data=[out:json][timeout:30];(' + query + ');out body;>;out skel qt;';
+                        let url = OvServer + '?data=[out:json][timeout:30];(' + query + ');(._;>;);out meta qt;';
                         console.log("GET: " + url);
                         jqXHRs.push($.get(url, () => { DisplayStatus.progress(Math.ceil(((++Progress + 1) * 100) / LayerCounts)) }));
                     });
@@ -325,10 +320,9 @@ var OvPassCnt = (function () {
                                             break;
                                     };
                                     if (result) return node;
-                                 };
+                                };
                             });
                             geojson.forEach(function (val1) {
-                                delete val1.id;                             // delete Unnecessary osmid
                                 let cidx = Cache.geojson.findIndex(function (val2) {
                                     if (val2.properties.id == val1.properties.id) return true;
                                 });
@@ -417,7 +411,7 @@ var DisplayStatus = (function () {
                     break;
 
                 default: // 縦画面
-                    use_H = window.innerHeight - 80;
+                    use_H = window.innerHeight - 70;    // header + filtter height
                     let map_H = Math.round(use_H * magni);
                     let dat_H = use_H - map_H;
                     $("#mapid").css("height", map_H + "px");

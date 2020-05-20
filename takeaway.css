@@ -50,7 +50,6 @@ header {
     overflow: hidden;
 }
 
-
 /* Map Area */
 
 #mapid {
@@ -58,16 +57,14 @@ header {
     width: 100%;
 }
 
-
 /* Data area */
 
 #filterid {
     margin: 0px;
     padding: 1px;
-    height: 40px;
+    height: 30px;
     width: 100%;
 }
-
 
 /* Data area */
 
@@ -76,7 +73,6 @@ header {
     padding: 1px;
     width: 100%;
 }
-
 
 /* table area(include Data area) */
 
@@ -90,7 +86,6 @@ header {
     background-color: rgba(255, 255, 255, 0.5);
     padding: 10px;
 }
-
 
 /* default parts set */
 
@@ -118,18 +113,19 @@ div.icon {
     white-space: nowrap;
 }
 
-img.icon {
-    width: 16px;
-    height: 16px;
+a.icon {
+    color: white;
 }
 
-a.icon {
-    color: white;    
+img.icon {
+    width: 20px;
+    height: 20px;
 }
 
 span.icon {
     margin-left: 4px;
-    font-size: 14px;
+    padding: 2px;
+    font-size: 12px;
     white-space: nowrap;
     background-color: white;
     line-height: 1.0;
@@ -144,4 +140,29 @@ pre {
 .modal-backdrop {
     background-color: initial !important;
     opacity: 1 !important;
+}
+
+#copied {
+    background-color: rgb(255, 193, 7);
+    padding: 0.5em;
+    left: 0em;
+    position: absolute;
+    z-index: 2;
+    opacity: 0;
+}
+
+.copied {
+    animation: copyCompleted 2s;
+}
+
+@keyframes copyCompleted {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }

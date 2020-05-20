@@ -1,11 +1,7 @@
 {
     "category": {
-        "filter_targets": [
-            "amenity",
-            "shop"
-        ],
         "amenity": {
-            "library": "図書館",
+            "library": "図書館（目印の施設）",
             "bar": "バー/酒場",
             "cafe": "カフェ/喫茶店",
             "drinking_water": "給水所/水栓",
@@ -27,7 +23,7 @@
             "coffee": "コーヒー店",
             "confectionery": "お菓子店(甘味)",
             "convenience": "コンビニエンスストア",
-            "deli": "惣菜販売店",
+            "deli": "お弁当/惣菜屋",
             "dairy": "乳製品店",
             "farm": "農場直売店",
             "frozen_food": "冷凍食品専門店",
@@ -109,11 +105,42 @@
             "yakiniku": "焼肉",
             "yakitori": "焼鳥"
         },
-        "delivery": {
-            "yes": "配達あり",
-            "no": "配達なし",
-            "only": "配達のみ"
+        "takeaway": {
+            "yes": "持ち帰りあり",
+            "no": "持ち帰りなし",
+            "only": "持ち帰り専門"
         },
-        "suffix_covid19": "(臨時)"
+        "delivery": {
+            "yes": "宅配あり",
+            "no": "宅配なし",
+            "only": "宅配専門"
+        },
+        "diet": {
+            "diet:pescetarian": "ペクスタリアン",
+            "diet:vegetarian": "ベジタリアン",
+            "diet:lacto_vegetarian": "ラクト・ベジタリアン",
+            "diet:ovo_vegetarian": "オボ・ベジタリアン",
+            "diet:vegan": "ヴィーガン",
+            "diet:fruitarian": "フルータリアン",
+            "diet:raw": "未料理/未加工",
+            "diet:gluten_free": "グルテンフリー",
+            "diet:dairy_free": "デイリーフリー",
+            "diet:lactose_free": "ラクトースフリー",
+            "diet:halal": "ハラル",
+            "diet:kosher": "コーシェル"
+        },
+        "suffix_covid19": "(暫定)"
+    },
+    "opening_hours": {
+        "Mo": "月",
+        "Tu": "火",
+        "We": "水",
+        "Th": "木",
+        "Fr": "金",
+        "Sa": "土",
+        "Su": "日",
+        "PH": "祝日",
+        "off": "休業",
+        "24\/7": "24時間営業"
     }
 }
